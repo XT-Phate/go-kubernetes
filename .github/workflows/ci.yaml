@@ -18,128 +18,125 @@ concurrency:
       - release-*
 name: default
 jobs:
-  default:
-    permissions:
-      actions: read
-      contents: write
-      issues: read
-      packages: write
-      pull-requests: read
-    runs-on: ubuntu-24.04
-    if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
-    steps:
-      - name: gather-system-info
-        id: system-info
-        uses: kenchan0130/actions-system-info@59699597e84e80085a750998045983daa49274c4 # version: v1.4.0
-        continue-on-error: true
-      - name: print-system-info
-        run: |
-          MEMORY_GB=$((${{ steps.system-info.outputs.totalmem }}/1024/1024/1024))
+  # default:
+  #   permissions:
+  #     actions: read
+  #     contents: write
+  #     issues: read
+  #     packages: write
+  #     pull-requests: read
+  #   runs-on: ubuntu-24.04
+  #   if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
+  #   steps:
+  #     - name: gather-system-info
+  #       id: system-info
+  #       uses: kenchan0130/actions-system-info@59699597e84e80085a750998045983daa49274c4 # version: v1.4.0
+  #       continue-on-error: true
+  #     - name: print-system-info
+  #       run: |
+  #         MEMORY_GB=$((${{ steps.system-info.outputs.totalmem }}/1024/1024/1024))
 
-          OUTPUTS=(
-            "CPU Core: ${{ steps.system-info.outputs.cpu-core }}"
-            "CPU Model: ${{ steps.system-info.outputs.cpu-model }}"
-            "Hostname: ${{ steps.system-info.outputs.hostname }}"
-            "NodeName: ${NODE_NAME}"
-            "Kernel release: ${{ steps.system-info.outputs.kernel-release }}"
-            "Kernel version: ${{ steps.system-info.outputs.kernel-version }}"
-            "Name: ${{ steps.system-info.outputs.name }}"
-            "Platform: ${{ steps.system-info.outputs.platform }}"
-            "Release: ${{ steps.system-info.outputs.release }}"
-            "Total memory: ${MEMORY_GB} GB"
-          )
+  #         OUTPUTS=(
+  #           "CPU Core: ${{ steps.system-info.outputs.cpu-core }}"
+  #           "CPU Model: ${{ steps.system-info.outputs.cpu-model }}"
+  #           "Hostname: ${{ steps.system-info.outputs.hostname }}"
+  #           "NodeName: ${NODE_NAME}"
+  #           "Kernel release: ${{ steps.system-info.outputs.kernel-release }}"
+  #           "Kernel version: ${{ steps.system-info.outputs.kernel-version }}"
+  #           "Name: ${{ steps.system-info.outputs.name }}"
+  #           "Platform: ${{ steps.system-info.outputs.platform }}"
+  #           "Release: ${{ steps.system-info.outputs.release }}"
+  #           "Total memory: ${MEMORY_GB} GB"
+  #         )
 
-          for OUTPUT in "${OUTPUTS[@]}";do
-            echo "${OUTPUT}"
-          done
-        continue-on-error: true
-      - name: checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # version: v6.0.2
-      - name: Unshallow
-        run: |
-          git fetch --prune --unshallow
-      - name: Set up Docker Buildx
-        id: setup-buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # version: v4.0.0
-        with:
-          driver: remote
-          endpoint: tcp://buildkit-amd64.ci.svc.cluster.local:1234
-        timeout-minutes: 10
-      - name: base
-        run: |
-          make base
-      - name: integration-test
-        run: |
-          make integration-test
-      - name: release-notes
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          make release-notes
-      - name: Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # version: v2.5.0
-        with:
-          body_path: _out/RELEASE_NOTES.md
-          draft: "true"
-  integration-test:
-    runs-on: ubuntu-24.04
-    if: github.event_name == 'pull_request'
-    needs:
-      - default
-    steps:
-      - name: gather-system-info
-        id: system-info
-        uses: kenchan0130/actions-system-info@59699597e84e80085a750998045983daa49274c4 # version: v1.4.0
-        continue-on-error: true
-      - name: print-system-info
-        run: |
-          MEMORY_GB=$((${{ steps.system-info.outputs.totalmem }}/1024/1024/1024))
+  #         for OUTPUT in "${OUTPUTS[@]}";do
+  #           echo "${OUTPUT}"
+  #         done
+  #       continue-on-error: true
+  #     - name: checkout
+  #       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # version: v6.0.2
+  #     - name: Unshallow
+  #       run: |
+  #         git fetch --prune --unshallow
+  #     - name: Set up Docker Buildx
+  #       id: setup-buildx
+  #       uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # version: v4.0.0
+  #       with:
+  #         driver: remote
+  #         endpoint: tcp://buildkit-amd64.ci.svc.cluster.local:1234
+  #       timeout-minutes: 10
+  #     - name: base
+  #       run: |
+  #         make base
+  #     - name: integration-test
+  #       run: |
+  #         make integration-test
+  #     - name: release-notes
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       run: |
+  #         make release-notes
+  #     - name: Release
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # version: v2.5.0
+  #       with:
+  #         body_path: _out/RELEASE_NOTES.md
+  #         draft: "true"
+  # integration-test:
+  #   runs-on: ubuntu-24.04
+  #   if: github.event_name == 'pull_request'
+  #   needs:
+  #     - default
+  #   steps:
+  #     - name: gather-system-info
+  #       id: system-info
+  #       uses: kenchan0130/actions-system-info@59699597e84e80085a750998045983daa49274c4 # version: v1.4.0
+  #       continue-on-error: true
+  #     - name: print-system-info
+  #       run: |
+  #         MEMORY_GB=$((${{ steps.system-info.outputs.totalmem }}/1024/1024/1024))
 
-          OUTPUTS=(
-            "CPU Core: ${{ steps.system-info.outputs.cpu-core }}"
-            "CPU Model: ${{ steps.system-info.outputs.cpu-model }}"
-            "Hostname: ${{ steps.system-info.outputs.hostname }}"
-            "NodeName: ${NODE_NAME}"
-            "Kernel release: ${{ steps.system-info.outputs.kernel-release }}"
-            "Kernel version: ${{ steps.system-info.outputs.kernel-version }}"
-            "Name: ${{ steps.system-info.outputs.name }}"
-            "Platform: ${{ steps.system-info.outputs.platform }}"
-            "Release: ${{ steps.system-info.outputs.release }}"
-            "Total memory: ${MEMORY_GB} GB"
-          )
+  #         OUTPUTS=(
+  #           "CPU Core: ${{ steps.system-info.outputs.cpu-core }}"
+  #           "CPU Model: ${{ steps.system-info.outputs.cpu-model }}"
+  #           "Hostname: ${{ steps.system-info.outputs.hostname }}"
+  #           "NodeName: ${NODE_NAME}"
+  #           "Kernel release: ${{ steps.system-info.outputs.kernel-release }}"
+  #           "Kernel version: ${{ steps.system-info.outputs.kernel-version }}"
+  #           "Name: ${{ steps.system-info.outputs.name }}"
+  #           "Platform: ${{ steps.system-info.outputs.platform }}"
+  #           "Release: ${{ steps.system-info.outputs.release }}"
+  #           "Total memory: ${MEMORY_GB} GB"
+  #         )
 
-          for OUTPUT in "${OUTPUTS[@]}";do
-            echo "${OUTPUT}"
-          done
-        continue-on-error: true
-      - name: checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # version: v6.0.2
-      - name: Unshallow
-        run: |
-          git fetch --prune --unshallow
-      - name: Set up Docker Buildx
-        id: setup-buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # version: v4.0.0
-        with:
-          driver: remote
-          endpoint: tcp://buildkit-amd64.ci.svc.cluster.local:1234
-        timeout-minutes: 10
-      - name: run-integration-test
-        if: github.event_name == 'pull_request'
-        run: |
-          make run-integration-test
-      - name: coverage
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # version: v5.5.2
-        with:
-          files: _out/coverage-integration.txt
-          flags: integration-test
-          token: ${{ secrets.CODECOV_TOKEN }}
-        timeout-minutes: 3
+  #         for OUTPUT in "${OUTPUTS[@]}";do
+  #           echo "${OUTPUT}"
+  #         done
+  #       continue-on-error: true
+  #     - name: checkout
+  #       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # version: v6.0.2
+  #     - name: Unshallow
+  #       run: |
+  #         git fetch --prune --unshallow
+  #     - name: Set up Docker Buildx
+  #       id: setup-buildx
+  #       uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # version: v4.0.0
+  #       with:
+  #         driver: remote
+  #         endpoint: tcp://buildkit-amd64.ci.svc.cluster.local:1234
+  #       timeout-minutes: 10
+  #     - name: run-integration-test
+  #       if: github.event_name == 'pull_request'
+  #       run: |
+  #         make run-integration-test
+  #     - name: coverage
+  #       uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # version: v5.5.2
+  #       with:
+  #         files: _out/coverage-integration.txt
+  #         flags: integration-test
+  #         token: ${{ secrets.CODECOV_TOKEN }}
+  #       timeout-minutes: 3
   lint:
     runs-on: ubuntu-24.04
-    if: github.event_name == 'pull_request'
-    needs:
-      - default
     steps:
       - name: gather-system-info
         id: system-info
@@ -174,10 +171,6 @@ jobs:
       - name: Set up Docker Buildx
         id: setup-buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # version: v4.0.0
-        with:
-          driver: remote
-          endpoint: tcp://buildkit-amd64.ci.svc.cluster.local:1234
-        timeout-minutes: 10
       - name: lint
         run: |
           make lint
@@ -185,7 +178,7 @@ jobs:
     runs-on: ubuntu-24.04
     if: github.event_name == 'pull_request'
     needs:
-      - default
+      - lint
     steps:
       - name: gather-system-info
         id: system-info
@@ -220,10 +213,6 @@ jobs:
       - name: Set up Docker Buildx
         id: setup-buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # version: v4.0.0
-        with:
-          driver: remote
-          endpoint: tcp://buildkit-amd64.ci.svc.cluster.local:1234
-        timeout-minutes: 10
       - name: unit-tests
         run: |
           make unit-tests
